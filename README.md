@@ -1,18 +1,18 @@
 
 ## Overview 
-This tutorial explains how to set up a Bash script that generates a static index.html file with system information daily at 05:00. It uses a systemd service and timer on the Arch Linux droplet with the Nginx web server and hosting it on two server with load balancer to handle any request. 
+This tutorial explains how to set up a Bash script that generates a static index.html file with system information daily at 05:00. It uses a systemd service and timer on the Arch Linux droplet with the Nginx web server and hosting it on two servers with a load balancer to handle any request. 
 
 ## Features
 - Automates daily generation of a static `index.html` with system information.
 - Uses `systemd` service and timer for scheduling.
-- Display the HTML file through an Nginx web server.
-- Uses load balancer to handle request to the servers 
-
+- Displays the HTML file through an Nginx web server.
+- Uses a load balancer to handle request to the servers 
+- Use UFW to secure the server.
 ## Requirements
-add something here
+
 1. DigitalOcean account
 2. Arch Linux image (cloudimg and ending with .qcow2)
-3. ssh key pair 
+3. SSH key pair 
 
 link to download image: [Package Registry · Arch Linux / arch-boxes · GitLab](https://gitlab.archlinux.org/archlinux/arch-boxes/-/packages/1617)
 ## Getting Started
@@ -28,7 +28,7 @@ In this section, we will create servers (droplets) on DigitalOcean.
 1. Go to [https://www.digitalocean.com/](https://www.digitalocean.com/).
 2. Log in or sign up.
 3. Click **Create**:  
-    ![create button](./linux_assigment3part2_assets/create_button.png)
+    ![create button](assets/create_button.png)
 4. In the drop-down menu, select **Droplet**.
 5. Configure the following settings:
     1. **Region**: San Francisco.
@@ -51,7 +51,7 @@ A load balancer is hardware or software that distributes incoming requests from 
 ---
 ### Steps to Create a Load Balancer on DigitalOcean
 1. On DigitalOcean, click **Create**:  
-    ![create button](./linux_assigment3part2_assets/create_button.png)
+    ![create button](assets/create_button.png)
 2. In the drop-down menu, select **Load Balancer**.
 3. Configure the following settings:
     1. **Load Balancer Type**: Region.
@@ -80,14 +80,14 @@ what you have done so far :
 ```
 
 
-Now, if you look at the status of the load balancer, you will see that it shows both of your servers are down, even though your servers are running.
+**Now**, if you look at the status of the load balancer, you will see that it shows both of your servers are down, even though your servers are running.
 
-The reason is that the load balancer is listening on port 80, but your droplet doesn't send anything on port 80. In this tutorial, we are going to use nginx to host webserver on port 80. 
+**The reason is** that the load balancer is listening on port 80, but your droplet is not configured to serve any content on port 80
 
 
 ---
 ### Set up droplet
-1. ssh to your arch linux droplet with your ssh key
+1. SSH to your arch linux droplet with your ssh key
 ```bash
 ssh -i <path_to_privatekey> arch@ip_of_your_droplet
 ```
@@ -166,9 +166,10 @@ now, after we finish setting up the user `webgen`, we are going to configure the
 
 ---
 ### Set up systemd 
-**What is systemd**
+**What is systemd?**
 is a software that provides a system and service manager that runs on PID 1 and starts the rest of the system.
 
+---
 ### Step to setup generate-index with systemd (g)
 In this step, we are going to set up systemd with the config file provided from this repository (.service and .timer) to make the server generate HTML. 
 
@@ -180,7 +181,7 @@ sudo mv generate-index.service /etc/systemd/system
 ```bash
 sudo systemctl start generate-index
 ```
-3. enable service, to make it start when server is boot
+3. enable service, to ensure it starts when the server boots
 ```bash
 sudo systemctl enable generate-index
 ```
@@ -207,8 +208,8 @@ sudo systemctl list-timers
 
 
 ---
-### What is Nginx?
-
+### Setup is Nginx
+**What is nginx?**
 Nginx is an HTTP **web server** used to host servers. It supports reverse proxying, load balancing, and more.
 
 ---
@@ -221,7 +222,7 @@ Learn more about web servers: [What Is a Web Server and How Does It Work? - IT G
 
 ---
 
-### Step to config `nginx`
+### Step to configure `nginx`
 
 In this step, we are going to set up Nginx on both servers, using the `nginx.conf` file provided in this repository.
 
@@ -261,9 +262,74 @@ sudo systemctl enable nginx
 [linux - Difference in sites-available vs sites-enabled vs conf.d directories (Nginx)? - Server Fault](https://serverfault.com/questions/527630/difference-in-sites-available-vs-sites-enabled-vs-conf-d-directories-nginx)
 
 ---
+### Setup `ufw`
+**what is ufw?**
+UFW(**u**ncomplicated **f**ire**w**all) is a firewall configuration tool that run on top `iptable`
+ it provide streamline interface for configuring common firewall use cases via command line.
+
+---
+### Step to configure UFW
+in this step, we will config the `ufw` firewall to:
+
+- allow SSH (port 22) and HTTP connections from anywhere.
+- enable SSH rate limiting
+- allow http connections
+
+this configuration enables http connection, allowing other people to access your website. It also allows SSH access for you to be able to connect to your droplet (this also allows other people to connect, since we didn't limit it to your IP address). Additionally, we want to limit the failed login attempts to prevent other people to brute-force attack the droplet.
+
+1. enable and start the service
+
+```shell
+sudo systemctl enable --now ufw.service
+```
+
+2. set the table rule to allow ssh from anywhere
+
+```shell
+sudo ufw allow SSH
+```
+
+3. limit the incoming ssh
+
+```shell
+sudo ufw limit ssh
+```
+
+4. allow http
+
+```shell
+sudo ufw allow http
+```
+
+5. check that ssh is set in the table rules
+
+```shell
+sudo ufw app list
+```
+
+6. after make sure that ssh is in the app list, turn on firewall
+
+```shell
+sudo ufw enable
+```
+
+**To check the status of the firewall**
+
+```shell
+sudo ufw status verbose
+```
+
+this should show the following configuration:
+- **allow** (ipv4 and ipv6) port 22 (SSH) but **limit** the ssh times, any IP address can ssh
+- **allow** (ipv4 and ipv6)port 80 (http) from any ip
+
+#### Reference
+[UFW Essentials: Common Firewall Rules and Commands | DigitalOcean](https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands)
+
+---
 
 **DONE**, you have finished setting up two droplets with a load balancer. Now, if you check the load balancer status, you will see that both of your droplets are showing as healthy.
 
-![loadbalancer-status](./linux_assigment3part2_assets/loadbalancer_status.png)
-Now you can use your load balancer IP address to access the website
-ex. http://209.38.5.62
+http://209.38.5.104
+![loadbalancer-status](assets/loadbalancer_status.png)
+
