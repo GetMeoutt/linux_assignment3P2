@@ -108,7 +108,18 @@ sudo pacman -S git
 ```bash
 sudo pacman -S nginx
 ```
-
+6. install package `UFW`
+```bash
+sudo pacman -S ufw
+```
+7. clone this git repository
+```bash
+git clone https://github.com/GetMeoutt/linux_assignment3P2.git
+```
+8. `cd` to the folder
+```bash
+cd linux_assignment3P2
+```
 
 ---
 ### Set up `webgen` user
