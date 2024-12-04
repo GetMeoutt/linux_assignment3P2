@@ -257,9 +257,9 @@ sudo pacman -S nginx
 ```bash
 sudo mv nginx.conf /etc/nginx/
 ```
-3. create folder `sites-enable` and `sites-available` in nginx folder
+3. create folder `sites-enabled` and `sites-available` in nginx folder
 ```bash
-sudo mkdir /etc/nginx/sites-enable /etc/nginx/sites-available 
+sudo mkdir /etc/nginx/sites-enabled /etc/nginx/sites-available 
 ```
 - `sites-available` folder is for storing _all_ of your vhost configurations, whether or not they're currently enabled.
 - `sites-enabled` folder contains symlinks to files in the sites-available folder. This allows you to selectively disable vhosts by removing the symlink.
@@ -267,7 +267,7 @@ sudo mkdir /etc/nginx/sites-enable /etc/nginx/sites-available
 ```bash
 sudo mv webgenServer.conf /etc/nginx/sites-available 
 ```
-5. enable the server by create a symbolic link in `sites-enable`
+5. enable the server by create a symbolic link in `sites-enabled`
 ```bash
 sudo ln -s /etc/nginx/sites-available/webgenServer.conf /etc/nginx/sites-enabled/webgenServer.conf
 ```
