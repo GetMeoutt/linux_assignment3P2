@@ -169,8 +169,8 @@ sudo chmod +x /var/lib/webgen/bin/generate_index
 ```
 5. create files in folder documents and append any content inside
 ```bash
-echo hello | tee /var/lib/webgen/documents/file1
-echo hello | tee  /var/lib/webgen/documents/file2
+echo hello | sudo tee /var/lib/webgen/documents/file1 /var/lib/webgen/documents/file2
+
 ```
 
 6. change the permission of the folder (including anything inside to `webgen`)
