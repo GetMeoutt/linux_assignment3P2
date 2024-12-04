@@ -153,7 +153,7 @@ sudo useradd -r -d /var/lib/webgen -m webgen -s /usr/bin/nologin
 ```
 2. create folder `bin` , `HTML` and `document`
 ```bash
-sudo mkdir /var/lib/webgen/bin /var/lib/webgen/HTML /var/lib/webgen/document
+sudo mkdir /var/lib/webgen/bin /var/lib/webgen/HTML /var/lib/webgen/documents
 ```
 
 after you finish the step above you should be able to see the two folders inside `webgen`'s home directory. Now we are going to put script `generate-index` in the folder `bin` because the user `webgen` is responsible for generating HTML
@@ -169,8 +169,8 @@ sudo chmod +x /var/lib/webgen/bin/generate_index
 ```
 5. create files in folder documents and append any content inside
 ```bash
-echo hello > /var/lib/webgen/file1
-echo hello > /var/lib/webgen/file2
+echo hello > /var/lib/webgen/documents/file1
+echo hello > /var/lib/webgen/documents/file2
 ```
 
 6. change the permission of the folder (including anything inside to `webgen`)
