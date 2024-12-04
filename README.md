@@ -14,7 +14,7 @@ This tutorial explains how to set up a Bash script that generates a static index
 2. Arch Linux image (cloudimg and ending with .qcow2)
 3. SSH key pair 
 
-link to download image: [Package Registry · Arch Linux / arch-boxes · GitLab](https://gitlab.archlinux.org/archlinux/arch-boxes/-/packages/1617)
+link to download image: [Package Registry · Arch Linux / arch-boxes · GitLab](https://gitlab.archlinux.org/archlinux/arch-boxes/-/packages)
 ## Getting Started
 ### Create Servers (Droplets)
 
@@ -170,7 +170,7 @@ now, after we finish setting up the user `webgen`, we are going to configure the
 is a software that provides a system and service manager that runs on PID 1 and starts the rest of the system.
 
 ---
-### Step to setup generate-index with systemd (g)
+### Step to setup generate-index with systemd 
 In this step, we are going to set up systemd with the config file provided from this repository (.service and .timer) to make the server generate HTML. 
 
 1. move generate-index.service to `/etc/systemd/system`
@@ -256,6 +256,7 @@ sudo systemctl start nginx
 ```bash
 sudo systemctl enable nginx
 ```
+
 #### Reference 
 [What Is a Web Server and How Does It Work? - IT Glossary | SolarWinds](https://www.solarwinds.com/resources/it-glossary/web-server)
 [nginx - ArchWiki](https://wiki.archlinux.org/title/Nginx)
@@ -277,7 +278,11 @@ in this step, we will config the `ufw` firewall to:
 
 this configuration enables http connection, allowing other people to access your website. It also allows SSH access for you to be able to connect to your droplet (this also allows other people to connect, since we didn't limit it to your IP address). Additionally, we want to limit the failed login attempts to prevent other people to brute-force attack the droplet.
 
-1. enable and start the service
+0. install ufw
+```bash
+sudo pacman -S ufw
+```
+2. enable and start the service
 
 ```shell
 sudo systemctl enable --now ufw.service
@@ -330,6 +335,12 @@ this should show the following configuration:
 
 **DONE**, you have finished setting up two droplets with a load balancer. Now, if you check the load balancer status, you will see that both of your droplets are showing as healthy.
 
-http://209.38.5.104
 ![loadbalancer-status](assets/loadbalancer_status.png)
 
+and you can check the website that 2 droplets host by using the ip address of the load balancer  http://209.38.5.104
+
+![system_info](assets/system_info1.png)
+
+if you reload the page, you will see that the public IP address of server has changed. This happens because of the load balancer redirects you to another droplet . 
+
+![system_info2.png](assets/system_info2.png)
