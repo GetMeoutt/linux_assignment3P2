@@ -1,11 +1,12 @@
 
 ## Overview 
-This tutorial explains how to set up a Bash script that generates a static index.html file with system information daily at 05:00. It uses a systemd service and timer on the Arch Linux droplet with the Nginx web server and hosting it on two servers with a load balancer to handle any request. 
+This tutorial explains how to set up a Bash script that generates a static index.html file with system information daily at 05:00, along with a route to display files in the `document` folder. It uses a systemd service and timer on the Arch Linux droplet with the Nginx web server and hosting it on two servers with a load balancer to handle any request. 
 
 ## Features
 - Automates daily generation of a static `index.html` with system information.
 - Uses `systemd` service and timer for scheduling.
 - Displays the HTML file through an Nginx web server.
+- Display files in webserver via route /documents  ``
 - Uses a load balancer to handle request to the servers 
 - Use UFW to secure the server.
 ## Requirements
@@ -114,18 +115,24 @@ sudo pacman -S nginx
 **What is `webgen` user**
 **`webgen`** is a system user that we are going to create to handle tasks related to generating HTML pages and controlling Nginx. This user is intended to isolate tasks and permissions, reducing the risk of accidents and errors.
 
+
 after configuring everything, user `webgen`'s home directory should have the following structure: 
 ```text
-/var/lib/webgen
+/var/lib/webgen/
 |
 |_____/bin
 |       └-generate_index
 |_____/HTML
-        └-index
+|        └-index
+|_____/documents
+        └-file1
+        └-file2
+               
 ```
 
 - `bin` folder is going to be the place where we put the script `generate_index` and execute it from `.service` file (systemd)
 - `HTML` is a folder that stores the HTML file that is created by `generate_index`
+- `documents` is a folder that stores the files that we want to display on webserver 
 ---
 
 ### Step to create `webgen`
@@ -133,9 +140,9 @@ after configuring everything, user `webgen`'s home directory should have the fol
 ```bash
 sudo useradd -r -d /var/lib/webgen -m webgen -s /usr/bin/nologin
 ```
-2. create folder `bin` and `HTML`
+2. create folder `bin` , `HTML` and `document`
 ```bash
-sudo mkdir /var/lib/webgen/bin /var/lib/webgen/HTML
+sudo mkdir /var/lib/webgen/bin /var/lib/webgen/HTML /var/lib/webgen/document
 ```
 
 after you finish the step above you should be able to see the two folders inside `webgen`'s home directory. Now we are going to put script `generate-index` in the folder `bin` because the user `webgen` is responsible for generating HTML
@@ -149,8 +156,13 @@ sudo mv generate_index /var/lib/webgen/bin
 ```bash
 sudo chmod +x /var/lib/webgen/bin/generate_index
 ```
+5. create files in folder documents and append any content inside
+```bash
+echo hello > /var/lib/webgen/file1
+echo hello > /var/lib/webgen/file2
+```
 
-5. change the permission of the folder (including anything inside to `webgen`)
+6. change the permission of the folder (including anything inside to `webgen`)
 ```bash
 sudo chown -R webgen:webgen /var/lib/webgen
 ```
@@ -339,8 +351,8 @@ this should show the following configuration:
 
 and you can check the website that 2 droplets host by using the ip address of the load balancer  http://209.38.5.104
 
-![system_info](assets/system_info1.png)
+![system_info](./assets/system_info1.png )
 
 if you reload the page, you will see that the public IP address of server has changed. This happens because of the load balancer redirects you to another droplet . 
 
-![system_info2.png](assets/system_info2.png)
+![system_info2.png](./assets/system_info2.png)
